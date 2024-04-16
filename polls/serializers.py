@@ -12,12 +12,12 @@ class AnswerSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    answer_set = AnswerSerializer(many=True, read_only=True)
+    answer = AnswerSerializer(many=True)
 
     class Meta:
         model = Question
         fields = [
-            'id', 'title', 'answer_set',
+            'id', 'title', 'answer',
         ]
 
 
