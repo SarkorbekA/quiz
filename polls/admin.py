@@ -1,5 +1,6 @@
 from django.contrib import admin
 from . import models
+from .models import Quizzes
 
 
 @admin.register(models.Quizzes)
@@ -33,6 +34,12 @@ class QuestionAdmin(admin.ModelAdmin):
     inlines = [
         AnswerInlineModel,
     ]
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        default_quiz = Quizzes.objects.get(pk=1)
+        form.base_fields['quiz'].initial = default_quiz
+        return form
 
 
 @admin.register(models.Answer)

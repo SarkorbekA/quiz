@@ -51,5 +51,11 @@ def check_answers(request):
             raise NotFound(
                 {"error": "Answer with id {} not found".format(answer_id)},
             )
+    percent_correct = round((correct / data['question_count']) * 100, 1)
 
-    return JsonResponse({'correct_count': correct, 'incorrect_count': no_correct})
+    return JsonResponse({
+        'correct_count': correct,
+        'incorrect_count': no_correct,
+        'correct_percentage': percent_correct,
+        # 'incorrect_percentage': percent_incorrect
+    })
