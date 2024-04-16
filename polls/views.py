@@ -1,45 +1,21 @@
 import json
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Question, Answer, Quiz
-from rest_framework import serializers, status
-from rest_framework.exceptions import ValidationError, NotFound
+from .models import Answer, Quizzes
+from .serializers import QuizSerializer, QuestionSerializer
+from rest_framework.exceptions import NotFound
 from django.core.exceptions import ObjectDoesNotExist
 from random import shuffle
-
-
-class AnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Answer
-        fields = ['id', 'title']
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    answer_set = AnswerSerializer(many=True)
-
-    class Meta:
-        model = Question
-        fields = ['id', 'title', 'created_at', 'updated_at', 'answer_set']
-
-
-class QuizSerializer(serializers.ModelSerializer):
-    question_set = QuestionSerializer(many=True)
-
-    class Meta:
-        model = Quiz
-        fields = ['duration', 'question_count', 'question_set']
-
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+from django.utils import timezone
+from datetime import timedelta
 
 
 @api_view(['GET'])
 def random_question_list(request):
-    quiz = Quiz.objects.get(pk=1)
+    quiz = Quizzes.objects.get(pk=1)
 
-    questions = list(quiz.question_set.all())
+    questions = list(quiz.question.all())
 
     shuffle(questions)
 
@@ -48,7 +24,12 @@ def random_question_list(request):
     question_serializer = QuestionSerializer(questions, many=True)
 
     quiz_data = QuizSerializer(quiz).data
-    quiz_data['question_set'] = question_serializer.data
+
+    current_time = timezone.now()
+
+    quiz_data['question'] = question_serializer.data
+    quiz_data['start_at'] = current_time
+    quiz_data['end_at'] = current_time + timedelta(minutes=quiz_data['duration'])
 
     return Response(quiz_data)
 
